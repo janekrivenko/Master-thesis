@@ -1,0 +1,22 @@
+
+
+
+```{r}
+res.aov <- aov(full_df$left_G_temp_sup.G_T_transv ~ full_df$cr1)
+summary(res.aov)
+```
+
+```{r}
+res.aov <- aov(full_df$right_G_subcallosal ~ full_df$abca7)
+summary(res.aov)
+```
+
+```{r}
+res.aov <- aov(full_df$right_G_and_S_frontomargin ~ full_df$apoe)
+summary(res.aov)
+```
+
+```{r}
+res.aov <- aov(full_df$left_G_Ins_lg_and_S_cent_ins ~ full_df$apoe)
+summary(res.aov)
+```

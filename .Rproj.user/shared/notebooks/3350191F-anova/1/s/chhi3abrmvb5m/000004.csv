@@ -1,0 +1,2 @@
+"0","boxplot(right_G_and_S_frontomargin ~ apoe * bin1, data=full_df, frame = FALSE, "
+"0","        col = c(""#00AFBB"", ""#E7B800""), ylab=""cortical thickness"")"

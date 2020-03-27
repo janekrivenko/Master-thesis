@@ -1,0 +1,2 @@
+"0","apoebin1_plot <- full_df[, c(33, 152, 153)]"
+"0","apoebin1_plot$concat <- paste(as.character(apoebin1_plot$apoe), as.character(apoebin1_plot$bin1))"

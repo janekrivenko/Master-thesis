@@ -1,0 +1,172 @@
+
+#AN EXAMPLE THAT ANOVA WAS REALLY USEFUL PROCEDURE
+
+```{r}
+model2 <- lm(rowMeans(ct[, -1], na.rm = TRUE, dims = 1) ~ gene$apoe + gene$bin1 + gene$abca7)
+summary(model2)
+```
+
+right_S_suborbital", xlab = "apoe_bin1_abca7"
+
+```{r}
+model2 <- lm(ct$right_S_suborbital ~ gene$apoe + gene$bin1 + gene$abca7)
+summary(model2)
+```
+
+So we can notice that ANOVA test was useful since there was no relashinsip discovered for mentioned set of genes and avg cortical thickness but there is significant p-value for right_S_suborbital brain area and the mentioned set of genes
+
+
+#AVG cortical thickness
+
+[1] "apoe clu"
+
+```{r}
+model2 <- lm(rowMeans(ct[, -1], na.rm = TRUE, dims = 1) ~ gene$apoe + gene$clu)
+summary(model2)
+```
+
+[1] "apoe picalm"
+```{r}
+model2 <- lm(rowMeans(ct[, -1], na.rm = TRUE, dims = 1) ~ gene$apoe + gene$picalm)
+summary(model2)
+```
+
+NO LR with good result!
+
+
+
+#SINGLE BRAIN AREA 
+ONE_WAY ANOVA RESULTS
+BRAIN AREA AND SEX
+
+left_G_and_S_cingul.Mid.Ant	0.0092
+```{r}
+model2 <- lm(ct$left_G_and_S_cingul.Mid.Ant ~ gene$sex)
+summary(model2)
+```
+
+left_S_collat_transv_post	0.0219
+left_S_oc_middle_and_Lunatus	0.0379
+left_S_oc.temp_med_and_Lingual	0.0380
+left_S_temporal_transverse	0.0219
+right_G_and_S_cingul.Mid.Post	0.0379
+right_S_oc.temp_med_and_Lingual	0.0002
+```{r}
+ggboxplot(full_df, x = "sex", y = "right_S_oc.temp_med_and_Lingual", 
+          color = "sex", 
+          ylab = "right_S_oc.temp_med_and_Lingual", xlab = "sex") 
+```
+right_S_temporal_transverse	0.0219
+
+
+
+TWO_WAY ANOVA RESULT 
+apoe+bin1	
+brain_area	adjusted p-value
+left_G_subcallosal	0.0412
+right_G_and_S_frontomargin	0.0035
+
+```{r}
+model2 <- lm(ct$left_G_subcallosal ~ gene$apoe)
+summary(model2)
+```
+
+```{r}
+model2 <- lm(ct$left_G_subcallosal ~ gene$bin1)
+summary(model2)
+```
+
+parameters for apoe and parameters for bin1. But no interaction.
+```{r}
+model2 <- lm(ct$left_G_subcallosal ~ gene$apoe + gene$bin1)
+summary(model2)
+```
+
+```{r}
+grep("bin1", colnames(full_df))
+```
+
+```{r}
+apoebin1_plot <- full_df[, c(33, 152, 153)]
+apoebin1_plot$concat <- paste(as.character(apoebin1_plot$apoe), as.character(apoebin1_plot$bin1))
+```
+
+```{r}
+ggboxplot(apoebin1_plot, x = "concat", y = "left_G_subcallosal", 
+          color = "concat", 
+          ylab = "left_G_subcallosal", xlab = "apoe_bin1") + rotate_x_text(45)
+```
+
+
+include these variables and the interactions between them
+```{r}
+model2 <- lm(ct$left_G_subcallosal ~ gene$apoe * gene$bin1)
+summary(model2)
+```
+You need to know why some parameters will appear to be 'missing' from the output of the call to lm. This is due to the way factors enter the design matrix;
+
+
+Only the interactions
+
+```{r}
+model2 <- lm(ct$left_G_subcallosal ~ gene$apoe : gene$bin1)
+summary(model2)
+```
+
+some parameters will appear to be 'missing' from the output of the call to lm. This is due to the way factors enter the design matrix
+
+
+USAGE OF ANOVA TEST TO PROVE THAT INCLUDING ADDITIONAL VARIABLE TO MODEL 
+
+http://strata.uga.edu/8370/lecturenotes/multipleRegression.html
+
+ the simpler model always contains a subset of the parameters of the more complicated model
+ 
+ The idea is that the difference between the two models has a quantity called the extra sum of squares, equal to the reduction in the unexplained sum of squares produced by the additional model terms. This can be converted to a variance, which can be scaled against the unexplained variance term for the full model. A ratio of variances can be tested with an F-test; hence this problem can be solved with an ANOVA. Testing for the significance of additional variables between two models:
+
+```{r}
+model1 <- lm(ct$left_G_subcallosal ~ gene$apoe)
+model2 <- lm(ct$left_G_subcallosal ~ gene$bin1)
+model3 <- lm(ct$left_G_subcallosal ~ gene$apoe : gene$bin1)
+anova(model1, model2, model3)
+```
+
+```{r}
+model2 <- lm(ct$left_G_subcallosal ~ gene$apoe * gene$bin1)
+```
+
+```{r}
+library("olsrr")
+```
+
+Residual QQ Plot
+Graph for detecting violation of normality assumption.
+
+```{r}
+ols_plot_resid_qq(model2)
+```
+Residual Normality Test
+Test for detecting violation of normality assumption.
+
+```{r}
+ols_test_normality(model2)
+```
+
+Correlation between observed residuals and expected residuals under normality.
+
+```{r}
+ols_test_correlation(model2)
+```
+Histogram of residuals for detecting violation of normality assumption.
+
+```{r}
+ols_plot_resid_hist(model2)
+
+```
+
+
+
+
+
+
+

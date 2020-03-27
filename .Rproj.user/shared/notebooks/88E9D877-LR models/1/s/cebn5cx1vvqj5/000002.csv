@@ -1,0 +1,1 @@
+"0","model2 <- lm(ct$left_G_subcallosal ~ gene$apoe * gene$bin1)"

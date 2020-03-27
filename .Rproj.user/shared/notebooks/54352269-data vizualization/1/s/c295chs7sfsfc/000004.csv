@@ -1,0 +1,6 @@
+"0","library(""d3heatmap"")"
+"2","package ‘d3heatmap’ was built under R version 3.5.3"
+"0","d3heatmap(scale(ct[, -1]), #colors = ""RdYlBu"","
+"0","          k_row = 8, # Number of groups in rows"
+"0","          k_col = 3 # Number of groups in columns"
+"0","          )"

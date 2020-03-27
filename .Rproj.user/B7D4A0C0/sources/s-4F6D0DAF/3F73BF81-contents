@@ -1,0 +1,515 @@
+
+```{r}
+names(gene)[1] <- names(ct)[1]
+full_df = merge(ct, gene, by = 'subject_id')
+```
+
+```{r}
+colnames(full_df[, 152:157])
+```
+
+
+```{r}
+full_df$apoe <- as.factor(full_df$apoe)
+levels(full_df$apoe)
+
+full_df$bin1 <- as.factor(full_df$bin1)
+levels(full_df$bin1)
+
+full_df$clu <- as.factor(full_df$clu)
+levels(full_df$clu)
+
+full_df$abca7 <- as.factor(full_df$abca7)
+levels(full_df$abca7)
+
+full_df$cr1 <- as.factor(full_df$cr1)
+levels(full_df$cr1)
+
+full_df$picalm <- as.factor(full_df$picalm)
+levels(full_df$picalm)
+```
+
+levels are in correct order
+
+```{r}
+full_df <- full_df[complete.cases(full_df),]
+```
+
+
+```{r}
+# Compute the analysis of variance
+res.aov <- aov(left_G_and_S_frontomargin ~ apoe, data = full_df)
+# Summary of the analysis
+summary(res.aov)
+```
+
+
+As the p-value is less than the significance level 0.05, we can conclude that there are significant differences between the groups highlighted with â*" in the model summary.
+
+In one-way ANOVA test, a significant p-value indicates that some of the group means are different, but we donât know which pairs of groups are different.
+
+Itâs possible to perform multiple pairwise-comparison, to determine if the mean difference between specific pairs of group are statistically significant.
+
+
+ALL brain areas vs all genes
+```{r}
+brain_area <- names(full_df[, 2:149])
+genotype <- names(full_df[, 152:157])
+genotype[7] <- 'sex'
+```
+
+
+```{r}
+library("broom")
+```
+
+#one way anove
+1. all brain areas vs single genotype 
+
+```{r}
+aov_single <- as.data.frame(matrix(data = NA, nrow = length(brain_area), ncol = length(genotype)+1))
+names(aov_single)[1] <- 'brain_area'
+names(aov_single)[2] <- genotype[1]
+names(aov_single)[3] <- genotype[2]
+names(aov_single)[4] <- genotype[3]
+names(aov_single)[5] <- genotype[4]
+names(aov_single)[6] <- genotype[5]
+names(aov_single)[7] <- genotype[6]
+names(aov_single)[8] <- genotype[7]
+aov_single$brain_area <- brain_area
+```
+
+```{r}
+for (g in 1:length(genotype)){
+  for (br in 1:length(brain_area)){
+    res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[g]]])
+    s <- tidy(res.aov)
+    aov_single[br, (g+1)] <- s$p.value[1]
+  }
+}
+
+aov_single$bonferroni_apoe <- p.adjust(aov_single$apoe, method = "bonferroni")
+aov_single$fdr_apoe <- p.adjust(aov_single$apoe, method = "fdr")
+
+aov_single$bonferroni_bin1 <- p.adjust(aov_single$bin1, method = "bonferroni")
+aov_single$fdr_bin1 <- p.adjust(aov_single$bin1, method = "fdr")
+
+aov_single$bonferroni_clu <- p.adjust(aov_single$clu, method = "bonferroni")
+aov_single$fdr_clu <- p.adjust(aov_single$clu, method = "fdr")
+
+aov_single$bonferroni_abca7 <- p.adjust(aov_single$abca7, method = "bonferroni")
+aov_single$fdr_abca7 <- p.adjust(aov_single$abca7, method = "fdr")
+
+aov_single$bonferroni_cr1 <- p.adjust(aov_single$cr1, method = "bonferroni")
+aov_single$fdr_cr1 <- p.adjust(aov_single$cr1, method = "fdr")
+
+aov_single$bonferroni_picalm <- p.adjust(aov_single$picalm, method = "bonferroni")
+aov_single$fdr_picalm <- p.adjust(aov_single$picalm, method = "fdr")
+
+aov_single$bonferroni_sex <- p.adjust(aov_single$sex, method = "bonferroni")
+aov_single$fdr_sex <- p.adjust(aov_single$sex, method = "fdr")
+
+aov_single[aov_single$fdr_sex < 0.05, c(1, 22)]
+```
+
+#two way anova
+Two-way ANOVA test is used to evaluate simultaneously the effect of two grouping variables (A and B) on a response variable.
+2. all brain areas vs double genotypes
+
+one dependent variable - cortical thickness
+and 2 independent variables - 2 independent categorical variable
+
+2 independent categorical variable in additive model => brain area ~ gene1 + gene2
+in the situation where the interaction is not significant you should use the additive model.
+
+2 categorical variables interact to create an synergistic effect => brain area ~ gene1 *+* gene2
+
+```{r}
+      res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[1]]])
+      tidy(res.aov)
+
+
+      res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[2]]])
+      tidy(res.aov)
+
+      res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[1]]]+full_df[[genotype[2]]])
+      tidy(res.aov)
+      
+        
+      res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[1]]]*full_df[[genotype[2]]])
+      tidy(res.aov)
+
+```
+
+
+
+
+```{r}
+aov_double <- as.data.frame(matrix(data = NA, nrow = length(brain_area), ncol = 22)) #ncol = C_2(7)
+names(aov_double)[1] <- 'brain_area'
+aov_double$brain_area <- brain_area
+
+k <- 2
+for (i in 1:(length(genotype)-1)){
+  for (j in (i+1):length(genotype)){
+        names(aov_double)[k] <- paste(genotype[i], genotype[j])
+        k <- k + 1
+  }
+}
+
+```
+
+
+```{r}
+k <- 2
+for (i in 1:(length(genotype)-1)){
+  for (j in (i+1):length(genotype)){
+    for (br in 1:length(brain_area)){
+      res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[i]]]*full_df[[genotype[j]]])
+      s <- tidy(res.aov)
+      #aov_double[br, k] <- paste(s$p.value[1], s$p.value[2], s$p.value[3])
+      aov_double[br, k] <- s$p.value[3]
+    }
+    k <- k + 1
+  }
+}
+
+for (col in 23:43){
+  aov_double[, col] <- p.adjust(aov_double[, (col-21)], method = "fdr")
+}
+
+aov_double[aov_double$V23 < 0.05, c(1, 2, 23)]
+
+aov_double[aov_double$V24 < 0.05, c(1, 3, 24)]
+
+aov_double[aov_double$V26 < 0.05, c(1, 5, 26)]
+
+aov_double[aov_double$V27 < 0.05, c(1, 6, 27)]
+
+aov_double[aov_double$V34 < 0.05, c(1, 13, 34)]
+
+
+```
+
+```{r}
+boxplot(right_G_and_S_frontomargin ~ apoe * bin1, data=full_df, frame = FALSE, 
+        col = c("#00AFBB", "#E7B800"), ylab="cortical thickness")
+```
+
+```{r}
+      res.aov <- aov(full_df[[brain_area[75]]] ~ full_df[[genotype[1]]])
+      tidy(res.aov)
+
+
+      res.aov <- aov(full_df[[brain_area[75]]] ~ full_df[[genotype[2]]])
+      tidy(res.aov)
+
+      res.aov <- aov(full_df[[brain_area[75]]] ~ full_df[[genotype[1]]]+full_df[[genotype[2]]])
+      tidy(res.aov)
+      
+        
+      res.aov <- aov(full_df[[brain_area[75]]] ~ full_df[[genotype[1]]]*full_df[[genotype[2]]])
+      tidy(res.aov)
+
+```
+It can be seen that the two main effects are close to be statistically significant, as well as their interaction.
+
+
+3. all brain areas vs triple genotypes
+#Three-way anova 
+```{r}
+for (n in 1:(length(genotype)-2)){
+  for (i in (n+1):(length(genotype)-1)){
+    for (j in (i+1):length(genotype)){
+      for (br in 1:length(brain_area)){
+        res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[n]]]*full_df[[genotype[i]]]*full_df[[genotype[j]]])
+        s <- tidy(res.aov)
+        if (mean(s$p.value, na.rm = TRUE) < 0.1){
+          print(s)
+          print(paste(br, genotype[n], genotype[i], genotype[j]))
+          }
+      }
+    }
+  }
+}
+
+```
+
+```{r}
+three_way_anova <- full_df[, c(1, 145, 152, 153, 155)]
+three_way_anova <- three_way_anova %>%  unite("gene_combo", apoe:abca7, remove = FALSE)
+```
+
+
+```{r}
+ggboxplot(three_way_anova, x = "gene_combo", y = "right_S_suborbital", 
+          color = "gene_combo", 
+          ylab = "right_S_suborbital", xlab = "apoe_bin1_abca7") + rotate_x_text(45)
+```
+if I change to (mean(s$p.value, na.rm = TRUE) < 0.2) there is around 20 results
+
+```{r}
+for (n in 1:(length(genotype)-2)){
+  for (i in (n+1):(length(genotype)-1)){
+    for (j in (i+1):length(genotype)){
+      for (br in 1:length(brain_area)){
+        res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[n]]]*full_df[[genotype[i]]]*full_df[[genotype[j]]])
+        s <- tidy(res.aov)
+        if (s$p.value[7] < 0.05){
+          print(s)
+          print(paste(br, genotype[n], genotype[i], genotype[j]))
+          }
+      }
+    }
+  }
+}
+
+```
+
+4. all brain aress vs quadruple genotypes
+
+
+```{r}
+for (k in 1:(length(genotype)-3)){
+  for (n in (k+1):(length(genotype)-2)){
+    for (i in (n+1):(length(genotype)-1)){
+      for (j in (i+1):length(genotype)){
+        for (br in 1:length(brain_area)){
+          res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[k]]] * full_df[[genotype[n]]] * full_df[[genotype[i]]] * 
+                           full_df[[genotype[j]]])
+          s <- tidy(res.aov)
+          if (mean(s$p.value, na.rm = TRUE) < 0.15){
+            print(s)
+            #print(br, genotype[k], genotype[n], genotype[i], genotype[j])}
+          }
+        }
+      }
+    }
+  }
+}
+#NO RESULT
+```
+
+
+5. all brain areas vs 5 genetopypes
+
+```{r}
+for (l in 1:(length(genotype)-4)){
+  for (k in (l+1):(length(genotype)-3)){
+    for (n in (k+1):(length(genotype)-2)){
+      for (i in (n+1):(length(genotype)-1)){
+        for (j in (i+1):length(genotype)){
+          for (br in 1:length(brain_area)){
+            res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[l]]] * full_df[[genotype[k]]] * full_df[[genotype[n]]] *
+                             full_df[[genotype[i]]] * full_df[[genotype[j]]])
+            s <- tidy(res.aov)
+            if (mean(s$p.value, na.rm = TRUE) < 0.15){
+              print(s)
+              #print(br, genotype[k], genotype[n], genotype[i], genotype[j])}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+#NO RESULT
+```
+
+6. all brain areas vs 6 genotypes
+
+```{r}
+for (m in 1:(length(genotype)-5)){
+  for (l in (m+1):(length(genotype)-4)){
+    for (k in (l+1):(length(genotype)-3)){
+      for (n in (k+1):(length(genotype)-2)){
+        for (i in (n+1):(length(genotype)-1)){
+          for (j in (i+1):length(genotype)){
+            for (br in 1:length(brain_area)){
+              res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[m]]] * full_df[[genotype[l]]] * full_df[[genotype[k]]] *
+                               full_df[[genotype[n]]] * full_df[[genotype[i]]] * full_df[[genotype[j]]])
+              s <- tidy(res.aov)
+              if (mean(s$p.value, na.rm = TRUE) < 0.1){
+                print(s)
+                #print(br, genotype[k], genotype[n], genotype[i], genotype[j])}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+#NO RESULT
+```
+
+7. all brain areas vs 7 genotypes
+
+```{r}
+for (br in 1:length(brain_area)){
+  res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[1]]] + full_df[[genotype[2]]]
+                 + full_df[[genotype[3]]] + full_df[[genotype[4]]] + full_df[[genotype[5]]] + full_df[[genotype[6]]] + full_df[[genotype[7]]])
+  s <- tidy(res.aov)
+  if (mean(s$p.value, na.rm = TRUE) < 0.1){
+    print(s)
+  }
+}
+
+#NO RESULT
+
+for (br in 1:length(brain_area)){
+  res.aov <- aov(full_df[[brain_area[br]]] ~ full_df[[genotype[1]]] * full_df[[genotype[2]]]
+                 * full_df[[genotype[3]]] * full_df[[genotype[4]]] * full_df[[genotype[5]]] * full_df[[genotype[6]]] * full_df[[genotype[7]]])
+  s <- tidy(res.aov)
+  if (mean(s$p.value, na.rm = TRUE) < 0.1){
+    print(s)
+  }
+}
+#NO RESULT
+
+```
+
+
+
+
+AVG CORTICAL THICKNESS 
+
+NO SIGNIFICANT RELATIONSGIP WITH GENOTYPES WERE REVEALED
+
+```{r}
+names(full_df)[75]
+```
+
+
+```{r}
+for (g in 1:length(genotype)){ #[2:75] left or [76;149] right or [2:149] all
+    res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~ full_df[[genotype[g]]])
+    s <- tidy(res.aov)
+    if (s$p.value[1] < 0.05){
+      print(s)
+    }
+}
+```
+
+No dependency between avg cortical thickness and any single genotype
+
+```{r}
+for (i in 1:(length(genotype)-1)){
+  for (j in (i+1):length(genotype)){
+      res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~ full_df[[genotype[i]]]*full_df[[genotype[j]]])
+      s <- tidy(res.aov)
+      if (s$p.value[3] < 0.05){
+      print(s)
+      print(paste(genotype[i], genotype[j]))
+      }
+  }
+}
+```
+
+```{r}
+for (n in 1:(length(genotype)-2)){
+  for (i in (n+1):(length(genotype)-1)){
+    for (j in (i+1):length(genotype)){
+        res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~
+                         full_df[[genotype[n]]]*full_df[[genotype[i]]]*full_df[[genotype[j]]])
+        s <- tidy(res.aov)
+        if (mean(s$p.value, na.rm = TRUE) < 0.1){
+          print(s)
+          print(paste(br, genotype[n], genotype[i], genotype[j]))
+          }
+    }
+  }
+}
+
+```
+
+
+```{r}
+for (k in 1:(length(genotype)-3)){
+  for (n in (k+1):(length(genotype)-2)){
+    for (i in (n+1):(length(genotype)-1)){
+      for (j in (i+1):length(genotype)){
+        res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~
+                         full_df[[genotype[k]]] * full_df[[genotype[n]]] * full_df[[genotype[i]]] * 
+                           full_df[[genotype[j]]])
+          s <- tidy(res.aov)
+          if (mean(s$p.value, na.rm = TRUE) < 0.1){
+            print(s)
+            #print(br, genotype[k], genotype[n], genotype[i], genotype[j])}
+          
+        }
+      }
+    }
+  }
+}
+
+```
+
+
+
+```{r}
+for (l in 1:(length(genotype)-4)){
+  for (k in (l+1):(length(genotype)-3)){
+    for (n in (k+1):(length(genotype)-2)){
+      for (i in (n+1):(length(genotype)-1)){
+        for (j in (i+1):length(genotype)){
+          res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~
+                           full_df[[genotype[l]]] * full_df[[genotype[k]]] * full_df[[genotype[n]]] *
+                             full_df[[genotype[i]]] * full_df[[genotype[j]]])
+            s <- tidy(res.aov)
+            if (mean(s$p.value, na.rm = TRUE) < 0.15){
+              print(s)
+              #print(br, genotype[k], genotype[n], genotype[i], genotype[j])}
+           
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+
+```{r}
+for (m in 1:(length(genotype)-5)){
+  for (l in (m+1):(length(genotype)-4)){
+    for (k in (l+1):(length(genotype)-3)){
+      for (n in (k+1):(length(genotype)-2)){
+        for (i in (n+1):(length(genotype)-1)){
+          for (j in (i+1):length(genotype)){
+            res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~
+                             full_df[[genotype[m]]] * full_df[[genotype[l]]] * full_df[[genotype[k]]] *
+                               full_df[[genotype[n]]] * full_df[[genotype[i]]] * full_df[[genotype[j]]])
+              s <- tidy(res.aov)
+              if (mean(s$p.value, na.rm = TRUE) < 0.1){
+                print(s)
+                #print(br, genotype[k], genotype[n], genotype[i], genotype[j])}
+              
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+
+```{r}
+res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~ full_df[[genotype[1]]] + full_df[[genotype[2]]]
+                 + full_df[[genotype[3]]] + full_df[[genotype[4]]] + full_df[[genotype[5]]] + full_df[[genotype[6]]] + full_df[[genotype[7]]])
+  s <- tidy(res.aov)
+  if (mean(s$p.value, na.rm = TRUE) < 0.1){
+    print(s)
+  }
+
+```
+
+
+
+
+
+
+

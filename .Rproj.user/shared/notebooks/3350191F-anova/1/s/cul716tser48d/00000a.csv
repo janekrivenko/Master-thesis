@@ -1,0 +1,3 @@
+"0","ggboxplot(three_way_anova, x = ""gene_combo"", y = ""right_S_suborbital"", "
+"0","          color = ""gene_combo"", "
+"0","          ylab = ""right_S_suborbital"", xlab = ""apoe_bin1_abca7"") + rotate_x_text(45)"

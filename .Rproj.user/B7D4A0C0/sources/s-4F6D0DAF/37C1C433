@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1577208301056.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "37C1C433",
+    "lastKnownWriteTime" : 30399714096578563,
+    "last_content_update" : 1577208301056,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "B5F6A6D5",
+        "caption" : "apoebin1_plot",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=apoebin1_plot&cache_key=B5F6A6D5",
+        "displayedObservations" : 244,
+        "environment" : "",
+        "object" : "apoebin1_plot",
+        "preview" : 0,
+        "totalObservations" : 244,
+        "variables" : 4
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

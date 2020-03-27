@@ -1,0 +1,1 @@
+"0","full_df <- full_df[complete.cases(full_df),]"

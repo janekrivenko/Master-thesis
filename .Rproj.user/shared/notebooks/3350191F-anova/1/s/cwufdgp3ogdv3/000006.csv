@@ -1,0 +1,7 @@
+"0","for (g in 1:length(genotype)){ #[2:75] left or [76;149] right or [2:149] all"
+"0","    res.aov <- aov(rowMeans(full_df[, 76:149], na.rm = TRUE) ~ full_df[[genotype[g]]])"
+"0","    s <- tidy(res.aov)"
+"0","    if (s$p.value[1] < 0.05){"
+"0","      print(s)"
+"0","    }"
+"0","}"

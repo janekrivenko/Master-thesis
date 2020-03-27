@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1575449230554.000,
+    "dirty" : false,
+    "encoding" : "ISO8859-1",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A13F8BB0",
+    "lastKnownWriteTime" : 1578505474,
+    "last_content_update" : 1578505474849,
+    "path" : "C:/Users/jeka1/Practical Training/structered analysis/data vizualization.Rmd",
+    "project_path" : "data vizualization.Rmd",
+    "properties" : {
+        "cursorPosition" : "143,12",
+        "scrollLine" : "124"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

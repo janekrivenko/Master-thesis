@@ -1,0 +1,199 @@
+
+
+```{r}
+ct <- read.csv("cortical_thickness_by_subject.csv")
+gene <- readxl::read_excel("Table_genotypes_RaulVicente.xlsx")
+```
+
+
+```{r}
+#apply like this (the 1 means calculate by row, 2 would calculate by column):
+
+the_median_left <- apply(ct[,2:75], 1, median, na.rm = TRUE)
+the_median_right <- apply(ct[,76:149], 1, median, na.rm = TRUE)
+
+ct$Median <- the_median
+```
+
+
+```{r}
+cor(the_median, gene$age)
+cor(the_median_left, gene$age)
+cor(the_median_right, gene$age)
+
+```
+
+
+```{r}
+k <- sapply(ct[, -1], class)
+unique(k)
+```
+
+
+```{r}
+library("d3heatmap")
+d3heatmap(scale(ct[, -1]), #colors = "RdYlBu",
+          k_row = 8, # Number of groups in rows
+          k_col = 3 # Number of groups in columns
+          )
+```
+
+initial set of patients: 156 rows!
+
+```{r}
+library(dendextend)
+# order for rows
+Rowv  <- ct[1:156, -1] %>% scale %>% dist %>% hclust %>% as.dendrogram %>%
+   set("branches_k_color", k = 2) %>% set("branches_lwd", 1.2) %>%
+   ladderize
+# Order for columns: We must transpose the data
+Colv  <- ct[1:156, -1] %>% scale %>% t %>% dist %>% hclust %>% as.dendrogram %>%
+   set("branches_k_color", k = 3) %>%
+   set("branches_lwd", 1.2) %>%
+   ladderize
+
+d3heatmap(scale(ct[1:156, -1]), #colors = "RdBu",
+          Rowv = Rowv, Colv = Colv)
+
+```
+
+Full data set
+
+```{r}
+# order for rows patients
+Rowv  <- ct[complete.cases(ct[, -1]), -1] %>% scale %>% dist %>% hclust %>% as.dendrogram %>%
+   set("branches_k_color", k = 8) %>% set("branches_lwd", 1.2) %>%
+   ladderize
+# Order for columns: We must transpose the data cortical thickness
+Colv  <- ct[complete.cases(ct[, -1]), -1] %>% scale %>% t %>% dist %>% hclust %>% as.dendrogram %>%
+   set("branches_k_color", k = 3) %>%
+   set("branches_lwd", 1.2) %>%
+   ladderize
+
+d3heatmap(scale(ct[complete.cases(ct[, -1]), -1]), #colors = "RdBu",
+          Rowv = Rowv, Colv = Colv)
+
+```
+
+https://www.datanovia.com/en/lessons/heatmap-in-r-static-and-interactive-visualization/
+
+comparisson of clustering methods
+
+```{r}
+# Prepare Data
+mydata <- na.omit(ct[, -1]) # listwise deletion of missing
+mydata <- scale(mydata) # standardize variables
+mydata_t <- scale(t(mydata))
+```
+
+```{r}
+# Ward Hierarchical Clustering
+d <- dist(mydata, method = "euclidean") # distance matrix
+fit <- hclust(d, method="ward")
+plot(fit) # display dendogram
+groups <- cutree(fit, k=5) # cut tree into 5 clusters
+# draw dendogram with red borders around the 5 clusters
+rect.hclust(fit, k=5, border="red")
+```
+
+```{r}
+# Ward Hierarchical Clustering with Bootstrapped p values
+library(pvclust)
+fit <- pvclust(mydata_t, method.hclust="ward.D2",
+   method.dist="euclidean")
+plot(fit) # dendogram with p values
+# add rectangles around groups highly supported by the data
+pvrect(fit, alpha=.95)
+```
+
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(cluster)
+library(cowplot)
+library(NbClust)
+library(clValid)
+library(ggfortify)
+library(dendextend)
+library(factoextra)
+library(FactoMineR)
+library(corrplot)
+library(GGally)
+library(ggiraphExtra)
+library(knitr)
+library(kableExtra)
+```
+
+
+```{r}
+rownames(ct) <- ct$subject_id
+ct_scaled <- scale(na.omit(ct[, -1]))
+#Dimensionality reduction can help with data visualization (e.g. PCA method).
+res.pca <- PCA(ct_scaled,  graph = FALSE)
+# Visualize eigenvalues/variances
+fviz_screeplot(res.pca, addlabels = TRUE, ylim = c(0, 50))
+
+# Extract the results for variables
+var <- get_pca_var(res.pca)
+# Contributions of variables to PC1
+fviz_contrib(res.pca, choice = "var", axes = 1, top = 10)
+# Contributions of variables to PC2
+fviz_contrib(res.pca, choice = "var", axes = 2, top = 10)
+# Control variable colors using their contributions to the principle axis
+fviz_pca_var(res.pca, col.var="contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), label = "none"
+             #repel = TRUE # Avoid text overlapping
+             ) + theme_minimal() + ggtitle("Variables - PCA")
+```
+
+https://towardsdatascience.com/10-tips-for-choosing-the-optimal-number-of-clusters-277e93d72d92
+
+The “Elbow” Method
+Probably the most well known method, the elbow method, in which the sum of squares at each number of clusters is calculated and graphed, and the user looks for a change of slope from steep to shallow (an elbow) to determine the optimal number of clusters. This method is inexact, but still potentially helpful.
+
+The Gap Statistic
+The gap statistic compares the total within intra-cluster variation for different values of k with their expected values under null reference distribution of the data. The estimate of the optimal clusters will be value that maximize the gap statistic (i.e., that yields the largest gap statistic). This means that the clustering structure is far away from the random uniform distribution of points.
+
+
+The Silhouette Method
+Another visualization that can help determine the optimal number of clusters is called the a silhouette method. Average silhouette method computes the average silhouette of observations for different values of k. The optimal number of clusters k is the one that maximize the average silhouette over a range of possible values for k.
+
+
+
+```{r}
+res.nbclust <- NbClust(ct_scaled, distance = "euclidean",
+                  min.nc = 2, max.nc = 9, 
+                  method = "complete", index ="all")
+factoextra::fviz_nbclust(res.nbclust) + theme_minimal() + ggtitle("NbClust's optimal number of clusters")
+```
+
+The NbClust package provides 30 indices for determining the relevant number of clusters and proposes to users the best clustering scheme from the different results obtained by varying all combinations of number of clusters, distance measures, and clustering methods.
+This suggest the optimal number of clusters is 3.
+
+
+```{r}
+ct_t_scaled <- t(ct)
+ct_t_scaled <- ct_t_scaled[-1,]
+ct_t_scaled <- apply(ct_t_scaled, 2, as.numeric)
+ct_t_scaled <- scale(na.omit(ct_t_scaled))
+res.nbclust <- NbClust(ct_t_scaled, distance = "euclidean",
+                  min.nc = 2, max.nc = 9, 
+                  method = "complete", index ="silhouette")
+factoextra::fviz_nbclust(res.nbclust) + theme_minimal() + ggtitle("NbClust's optimal number of clusters")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

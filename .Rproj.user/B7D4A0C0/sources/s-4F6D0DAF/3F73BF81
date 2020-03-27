@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1577111504371.000,
+    "dirty" : false,
+    "encoding" : "ISO8859-1",
+    "folds" : "250|6|266|0|\n",
+    "hash" : "0",
+    "id" : "3F73BF81",
+    "lastKnownWriteTime" : 1577208051,
+    "last_content_update" : 1577208051111,
+    "path" : "C:/Users/jeka1/Practical Training/structered analysis/anova.Rmd",
+    "project_path" : "anova.Rmd",
+    "properties" : {
+        "cursorPosition" : "247,0",
+        "scrollLine" : "236"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

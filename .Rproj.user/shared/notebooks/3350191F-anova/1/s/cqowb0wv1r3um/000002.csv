@@ -1,0 +1,6 @@
+"0","res.aov <- aov(rowMeans(full_df[, 2:149], na.rm = TRUE) ~ full_df[[genotype[1]]] + full_df[[genotype[2]]]"
+"0","                 + full_df[[genotype[3]]] + full_df[[genotype[4]]] + full_df[[genotype[5]]] + full_df[[genotype[6]]] + full_df[[genotype[7]]])"
+"0","  s <- tidy(res.aov)"
+"0","  if (mean(s$p.value, na.rm = TRUE) < 0.1){"
+"0","    print(s)"
+"0","  }"

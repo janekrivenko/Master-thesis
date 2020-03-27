@@ -1,0 +1,2 @@
+"0","      res.aov <- aov(full_df[[brain_area[75]]] ~ full_df[[genotype[1]]]+full_df[[genotype[2]]])"
+"0","      tidy(res.aov)"

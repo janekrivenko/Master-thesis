@@ -1,0 +1,2 @@
+"0","ct <- read.csv(""cortical_thickness_by_subject.csv"")"
+"0","gene <- readxl::read_excel(""Table_genotypes_RaulVicente.xlsx"")"

@@ -1,0 +1,3 @@
+"0","brain_area <- names(full_df[, 2:149])"
+"0","genotype <- names(full_df[, 152:157])"
+"0","genotype[7] <- 'sex'"

@@ -1,0 +1,1 @@
+{"frames":[],"message":"Error in factoextra::fviz_nbclust(res.nbclust) + theme_minimal() + ggtitle(\"NbClust's optimal number of clusters\") : \n  non-numeric argument to binary operator\n"}
